@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     
     # LOCAL APPS
     'invoices',
+    
+    # THIRD-PARTY APPS
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -139,3 +142,13 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Celery Configuration
+CELERY_BROKER_URL = config('CELERY_BROKER_URL')  # RabbitMQ URL
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')  # Use the database to store task results
+CELERY_ACCEPT_CONTENT = ['json']     # Accept JSON-formatted data
+CELERY_TASK_SERIALIZER = 'json'      # Serialize tasks in JSON
+CELERY_RESULT_SERIALIZER = 'json'    # Serialize results in JSON
+CELERY_TIMEZONE = 'UTC'              # Use UTC time zone
+

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Invoices</h1>
+
+{% for file, projects in grouped_invoices.items %}
+    <h2>File: {{ file.file.name }}</h2>
+    {% for project, invoices in projects.items %}
+        <h3>Project: {{ project }}</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Number of Hours</th>
+                    <th>Unit Price</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr>
+                    <td>{{ invoice.employee.employee_id }}</td>
+                    <td>{{ invoice.number_of_hours }}</td>
+                    <td>{{ invoice.unit_price }}</td>
+                    <td>{{ invoice.cost }}</td>
+                </tr>
+                {% endfor %}
+                <!-- Calculate the total for the project -->
+                <tr>
+                    <td colspan="3"><strong>Total</strong></td>
+                    <td><strong>{{ invoices|sum:'cost' }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    {% endfor %}
+{% endfor %}
+{% endblock %}

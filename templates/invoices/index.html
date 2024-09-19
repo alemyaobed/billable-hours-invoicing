@@ -3,12 +3,22 @@
 {% block title %}Billable Hours{% endblock %}
 
 {% block content %}
+
+<!-- Success/Error messages -->
+{% if messages %}
+<div class="mt-3">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <!-- Dark background with the main info section -->
-<div class="bg-dark text-light py-5" style="background: linear-gradient(to right, #2c3e50, #34495e);">
+<div class="text-light py-5">
     <div class="container text-center">
         <h1 class="display-4">Billable Hours Invoicing System</h1>
-        <p class="lead mb-5">Efficiently track time, generate invoices, and manage client payments.</p>
-        <button class="btn btn-lg btn-primary mt-5" data-toggle="modal" data-target="#uploadModal">
+        <p class="lead">Efficiently track time, generate invoices, and manage client payments.</p>
+        <button class="btn btn-lg btn-outline-gold mt-4" data-toggle="modal" data-target="#uploadModal">
             <i class="fas fa-file-upload"></i> Upload Timesheet (CSV)
         </button>
     </div>
@@ -19,38 +29,51 @@
     <div class="row">
         <!-- How It Works -->
         <div class="col-md-6">
-            <h2>How It Works</h2>
-            <p>The Billable Hours system allows uploading of  lawyers at your firm to submit their timesheets for projects they've worked on. Based on their grade, each lawyer has a billable rate, and their total working hours are used to generate invoices for clients. The application accepts CSV uploads of the timesheets and generates invoices automatically for each company.</p>
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2>How It Works</h2>
+                    <p>The Billable Hours system allows lawyers at your firm to submit their timesheets for projects they've worked on. Based on their grade, each lawyer has a billable rate, and their total working hours are used to generate invoices for clients. The application accepts CSV uploads of the timesheets and generates invoices automatically for each company.</p>
+                </div>
+            </div>
         </div>
-        
+
         <!-- CSV Format Example -->
         <div class="col-md-6">
-            <h2>Timesheet Format</h2>
-            <p>The CSV file you upload must follow this structure:</p>
-            <pre class="bg-light p-3 rounded">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2>Timesheet Format</h2>
+                    <p>The CSV file you upload must follow this structure:</p>
+                    <pre class="bg-light p-3 rounded">
 Employee ID, Billable Rate (per hour), Project, Date, Start Time, End Time
 1, 300, Google, 2019-07-01, 09:00, 17:00
 2, 100, Facebook, 2019-07-01, 11:00, 16:00
-            </pre>
+                    </pre>
+                </div>
+            </div>
         </div>
     </div>
-    
+
     <!-- Invoice Output Example -->
     <div class="row mt-4">
         <div class="col-md-12">
-            <h2>Invoice Example</h2>
-            <p>After uploading the timesheet, the system will generate an invoice in this format for each company:</p>
-            <pre class="bg-light p-3 rounded">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2>Invoice Example</h2>
+                    <p>After uploading the timesheet, the system will generate an invoice in this format for each company:</p>
+                    <pre class="bg-light p-3 rounded">
 Company: Google
 Employee ID  Number of Hours  Unit Price  Cost
 1            8                300         2400
 
 Total: GHC 2400
-            </pre>
-            <p>Each lawyer's working hours are multiplied by their hourly rate to calculate the cost per employee, and then summed up to provide a total amount per company.</p>
+                    </pre>
+                    <p>Each lawyer's working hours are multiplied by their hourly rate to calculate the cost per employee, and then summed up to provide a total amount per company.</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
 
 <!-- Modal for CSV Upload -->
 <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">

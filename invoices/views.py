@@ -1,45 +1,52 @@
-import csv
+from collections import defaultdict
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Timesheet, Project, Employee
-from django.shortcuts import render
+from .models import  TimeSheetFile, Invoice
+from .tasks import process_csv_file
 
 def index(request):
-    title = 'Index'
+    """
+    Render the index page where the user can upload a CSV file.
+    """
+    title = 'Billable Hours'
     return render(request, 'invoices/index.html', {'title': title})
 
 
 def upload_csv(request):
+    """
+    Handle CSV file upload, process the timesheet data, and generate invoices.
+    """
     if request.method == 'POST':
         csv_file = request.FILES['csvFile']
         if not csv_file.name.endswith('.csv'):
             messages.error(request, 'File is not CSV format.')
             return redirect('index')
         
-        # Process CSV data
-        try:
-            decoded_file = csv_file.read().decode('utf-8').splitlines()
-            reader = csv.DictReader(decoded_file)
-            for row in reader:
-                if not Project.objects.filter(name=row['Project']).exists():
-                    new_project = Project.objects.create(name=row['Project'])
-                if not Employee.objects.filter(employee_id=row['Employee ID']).exists():
-                    new_employee = Employee.objects.create(employee_id=row['Employee ID'])
-                    
-                Timesheet.objects.create(
-                    employee=new_employee,
-                    billable_rate=row['Billable Rate (per hour)'],
-                    project=new_project,
-                    date=row['Date'],
-                    start_time=row['Start Time'],
-                    end_time=row['End Time']
-                )
-            messages.success(request, 'File uploaded successfully.')
-        except Exception as e:
-            messages.error(request, f'Error processing file: {e}')
+        # Save the uploaded CSV file to the TimeSheetFile model
+        timesheet_file = TimeSheetFile.objects.create(file=csv_file)
         
-        return redirect('home')
-    
+        # Trigger Celery task to process the CSV file asynchronously
+        process_csv_file.delay(timesheet_file.id)
+        
+                
+        messages.success(request, 'File uploaded successfully. It is being processed.')
+        return redirect('index')
+
     return render(request, 'invoices/index.html')
+
+
+def view_invoices(request):
+    """
+    Display a list of all invoices grouped by file and then by project.
+    """
+    invoices = Invoice.objects.select_related('file', 'project', 'employee').all()
+
+    # Group invoices by file, then by project
+    grouped_invoices = defaultdict(lambda: defaultdict(list))
+
+    for invoice in invoices:
+        grouped_invoices[invoice.file][invoice.employee.project.name].append(invoice)
+
+    return render(request, 'invoices/invoices.html', {'grouped_invoices': grouped_invoices})
 
 
