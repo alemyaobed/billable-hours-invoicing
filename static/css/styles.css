@@ -1,0 +1,50 @@
+
+body {
+    display: flex;
+    flex-direction: column;
+    /* font-family: 'Roboto', sans-serif; */
+    font-family: oswald,sans-serif;
+    text-rendering: optimizeLegibility;
+    background-image: url('../images/background-img.png');
+    background-size: cover;
+    /* background-repeat: no-repeat; */
+    background-attachment: fixed;
+    background-position: center;
+    backdrop-filter: blur(25px);
+}
+
+main {
+    flex-grow: 1;
+}
+
+
+
+
+nav, footer {
+    color: white;
+}
+
+h1, h5 {
+    font-weight: 700;
+}
+
+.bg-dark {
+    border-radius: 50px;
+    width: 70%;
+    margin: 0 auto;
+}
+
+pre {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+}
+
+.card {
+    border-radius: 30px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
