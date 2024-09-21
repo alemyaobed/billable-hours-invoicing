@@ -79,3 +79,18 @@ h1, h5 {
 
 
 
+.flash-message {
+    position: fixed;
+    top: 20px; /* Adjust as needed */
+    right: 20px; /* Adjust as needed */
+    z-index: 1060; /* Ensure it’s on top of other elements */
+    transition: opacity 0.5s ease;
+    opacity: 1;
+}
+
+.flash-message.fade-out {
+    opacity: 0;
+}
+
+
+

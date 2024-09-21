@@ -1,11 +1,8 @@
-from collections import defaultdict
-from decimal import Decimal
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib import messages
-from .models import  InvoiceSummary, TimeSheetFile, TimesheetInvoice
+from django.shortcuts import get_object_or_404, render
+from .models import  InvoiceSummary, TimeSheetFile
 from .tasks import process_csv_file
-from django.template.loader import render_to_string
+
 
 def index(request):
     """
@@ -25,7 +22,7 @@ def upload_csv(request):
 
         # Trigger Celery task to process the CSV file asynchronously
         process_csv_file.delay(timesheet_file.id)
-
+        
         # Return a JSON response with the file ID for status checking
         return JsonResponse({'message': 'File uploaded successfully', 'file_id': timesheet_file.id})
 
