@@ -57,5 +57,5 @@ def view_invoices(request, file_id):
         'project_total_costs': invoice_summary.project_total_costs,
     }
 
-    return render(request, 'invoices/invoices.html', context)
+    return render(request, 'invoices/invoices_summary.html', context)
 
