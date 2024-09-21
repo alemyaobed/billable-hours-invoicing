@@ -2,56 +2,85 @@
 {% load custom_filters %}
 
 {% block content %}
-<div class="container mt-5" id="invoice-content">
 
-    <!-- Projects and Employees Summary -->
-    {% for project_name, employees in project_summary %}
-        <div class="card mb-4" style="page-break-after: always;"> <!-- Force page break after each project -->
-            <div class="card-header bg-dark">
-                <h2>Project: {{ project_name }}</h2>
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered table-hover text-center">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Employee ID</th>
-                            <th>Total Hours Worked</th>
-                            <th>Unit Price</th>
-                            <th>Cost</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for employee in employees %}
-                        <tr>
-                            <td>{{ employee.employee_id }}</td>
-                            <td>{{ employee.total_hours }}</td>
-                            <td>{{ employee.unit_price }}</td>
-                            <td>{{ employee.cost }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="3" class="text-right"><strong>Total Cost for Project</strong></td>
-                            <td>{{ project_total_costs|get_item:project_name }}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
-    {% endfor %}
+<!-- Button Container -->
+<div class="d-flex justify-content-between">
+    <!-- Home Button on the Left -->
+    <a href="{% url 'index' %}" class="btn btn-secondary">
+        <i class="bi bi-house-door"></i> Home
+    </a>
+
+    <!-- Download Button on the Right -->
+    <button id="download-pdf" class="btn btn-secondary ms-auto">
+        <i class="bi bi-download"></i> Download as PDF
+    </button>
 </div>
 
-<!-- Button to trigger the PDF download -->
-<button id="download-pdf" class="btn btn-primary mt-4">Download as PDF</button>
+<div class="container mt-5 border-custom p-4">
+    <div id="invoice-content">
+
+        <!-- Title -->
+        <div class="d-flex justify-content-between align-items-center mb-4 p-4">
+            <h2>Invoice Summary :</h2>
+        </div>
+
+        <!-- Projects and Employees Summary -->
+        {% for project_name, employees in project_summary %}
+            <div class="card mb-5" style="page-break-after: always; max-width: 800px; margin: auto;">
+                <div class="card-header bg-dark custom-radius">
+                    <h3 class="text-white">Company: {{ project_name }}</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-hover text-center" style="font-size: 0.9em; width: 100%;">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Total Hours Worked</th>
+                                <th>Unit Price</th>
+                                <th>Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employees %}
+                            <tr>
+                                <td>{{ employee.employee_id }}</td>
+                                <td>{{ employee.total_hours }}</td>
+                                <td>{{ employee.unit_price }}</td>
+                                <td>{{ employee.cost }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-right"><strong>Total Cost for Project</strong></td>
+                                <td>{{ project_total_costs|get_item:project_name }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+
+
+    </div>
+</div>
+
+<!-- Back to Top Button -->
+<button onclick="scrollToTop()" id="back-to-top" class="btn btn-secondary m-5">
+    <i class="bi bi-arrow-up"></i> Back to Top
+</button>
 
 {% endblock %}
 
 {% block extra_scripts %}
+    <!-- Include Bootstrap Icons for the download icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+
     <!-- This script will convert the invoice content to a PDF file -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <script>
         document.getElementById('download-pdf').addEventListener('click', function () {
+            
             var element = document.getElementById('invoice-content');
             html2pdf()
                 .from(element)
@@ -63,6 +92,20 @@
                 })
                 .save();
         });
+
+        // Scroll to Top Function
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Show Back to Top Button when Scrolling
+        window.onscroll = function () {
+            var backToTopBtn = document.getElementById("back-to-top");
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                backToTopBtn.style.display = "block";
+            } else {
+                backToTopBtn.style.display = "none";
+            }
+        };
     </script>
 {% endblock %}
-
