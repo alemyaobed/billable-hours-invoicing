@@ -39,7 +39,7 @@ h1, h5 {
 }
 
 .border-custom {
-    border: 2px solid #ccc; /* Change color as needed */
+    border: 1px solid #ccc; /* Change color as needed */
     border-radius: 50px;
 }
 
