@@ -6,7 +6,7 @@
 
     <!-- Projects and Employees Summary -->
     {% for project_name, employees in project_summary %}
-        <div class="card mb-4">
+        <div class="card mb-4" style="page-break-after: always;"> <!-- Force page break after each project -->
             <div class="card-header bg-dark">
                 <h2>Project: {{ project_name }}</h2>
             </div>
@@ -44,6 +44,7 @@
 
 <!-- Button to trigger the PDF download -->
 <button id="download-pdf" class="btn btn-primary mt-4">Download as PDF</button>
+
 {% endblock %}
 
 {% block extra_scripts %}
@@ -58,9 +59,10 @@
                     margin: 1,
                     filename: 'Invoice_{{ file_id }}.pdf',
                     html2canvas: { scale: 2 },
-                    jsPDF: { orientation: 'portrait' }
+                    jsPDF: { orientation: 'portrait', unit: 'in', format: 'letter' }
                 })
                 .save();
         });
     </script>
 {% endblock %}
+

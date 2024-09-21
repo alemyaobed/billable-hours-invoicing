@@ -14,7 +14,6 @@
 {% endif %}
 
 <!-- Dark background with the main info section -->
-
 <div class="text-dark py-5">
     <div class="container text-center">
         <h1 class="display-4 mb-5 ">Billable Hours Invoicing System</h1>
@@ -23,18 +22,13 @@
         <button class="btn btn-lg btn-outline-secondary mt-4" data-toggle="modal" data-target="#uploadModal">
             <i class="fas fa-file-upload"></i> Upload Timesheet (CSV)
         </button>
-        
-        <!-- Spinner -->
-        <div id="spinner" class="spinner-border text-primary" role="status" style="display:none;">
-            <span class="sr-only">Loading...</span>
-        </div>
+    
     </div>
 </div>
 
 <!-- System Explanation Section -->
 <div class="container mt-5">
     <div class="row">
-        <!-- How It Works -->
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-body ">
@@ -44,7 +38,6 @@
             </div>
         </div>
 
-        <!-- CSV Format Example -->
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-body">
@@ -60,14 +53,13 @@ Employee ID, Billable Rate (per hour), Project, Date, Start Time, End Time
         </div>
     </div>
 
-    <!-- Invoice Output Example -->
     <div class="row mt-4">
         <div class="col-md-12">
             <div class="card h-100">
                 <div class="card-body">
                     <h2>Invoice Example</h2>
                     <p>After uploading the timesheet, the system will generate an invoice in this format for each company:</p>
-                    <pre class="bg-light p-3 rounded" style>
+                    <pre class="bg-light p-3 rounded">
 Company: Google
 Employee ID  Number of Hours  Unit Price  Cost
 1            8                300         2400
@@ -90,26 +82,34 @@ Total: GHC 3000
 </div>
 
   
- <!-- Modal for CSV upload -->
+<!-- Modal for CSV upload -->
 <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="uploadModalLabel"><i class="fas fa-file-upload"></i> Upload Timesheet</h5>
+            <div class="modal-header text-center mb-5"> <!-- Centering the header text -->
+                <h5 class="modal-title w-100" id="uploadModalLabel">Upload Timesheet CSV File</h5> <!-- w-100 ensures full width -->
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body text-center"> <!-- Centering the body text -->
                 <form id="uploadForm" action="{% url 'upload_csv' %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <div class="form-group">
-                        <label for="csvFile"><i class="fas fa-file-csv"></i> Choose CSV file</label>
+                    <div class="form-group mb-5">
                         <input type="file" class="form-control-file" id="csvFile" name="csvFile" accept=".csv" required>
+                        <!-- File icon and name preview -->
+                        <div id="filePreview" class="mt-4" style="display: none;">
+                            <i class="fas fa-file" style="font-size: 24px;"></i>
+                            <span id="fileName"></span>
+                        </div>
                     </div>
                     <div class="modal-footer d-flex justify-content-center">
-                        <button type="submit" class="btn btn-outline-primary btn-lg">
-                            <i class="fas fa-cloud-upload-alt"></i> Upload
+                        <!-- Updated button with spinner inside it -->
+                        <button id="uploadButton" type="submit" class="btn btn-outline-secondary">
+                            <i class="fas fa-cloud-upload-alt"></i> <span>Upload</span>
+                            <div id="buttonSpinner" class="spinner-border spinner-border-sm text-light" role="status" style="display:none;">
+                                <span class="sr-only">Loading...</span>
+                            </div>
                         </button>
                     </div>
                 </form>
@@ -118,12 +118,33 @@ Total: GHC 3000
     </div>
 </div>
 
+
 <script>
+    // Handle file selection and show file icon and name
+    document.getElementById('csvFile').addEventListener('change', function() {
+        const fileInput = document.getElementById('csvFile');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        
+        if (fileInput.files.length > 0) {
+            filePreview.style.display = 'block'; // Show file preview
+            fileName.textContent = fileInput.files[0].name; // Show the file name
+        } else {
+            filePreview.style.display = 'none'; // Hide file preview if no file is selected
+            fileName.textContent = ''; // Clear file name
+        }
+    });
+
+    // Existing form submission script with spinner and status polling
     document.getElementById('uploadForm').onsubmit = function(event) {
         event.preventDefault(); // Prevent the default form submission
 
-        // Show the spinner when the form is submitted
-        document.getElementById('spinner').style.display = 'inline-block';
+        // Disable the upload button and show the spinner
+        let uploadButton = document.getElementById('uploadButton');
+        let buttonSpinner = document.getElementById('buttonSpinner');
+        
+        uploadButton.disabled = true;
+        buttonSpinner.style.display = 'inline-block'; // Show spinner
 
         // Prepare the form data
         let formData = new FormData(this);
@@ -136,35 +157,31 @@ Total: GHC 3000
         .then(response => response.json()) // Expecting JSON response
         .then(data => {
             if (data.error) {
-                // Show error flash message
-                let messagesDiv = document.getElementById('messages');
-                messagesDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-                document.getElementById('spinner').style.display = 'none';
-                return;
+                // Show error message
+                alert(data.error);
+            } else {
+                // Get the file ID from the response to start polling for its status
+                const fileId = data.file_id;
+
+                // Start polling the server for processing status
+                const intervalId = setInterval(() => {
+                    fetch(`/status/${fileId}/`)
+                        .then(response => response.json())
+                        .then(statusData => {
+                            if (statusData.status === 'processed') {
+                                clearInterval(intervalId);
+                                window.location.href = `/invoices/${fileId}`; // Redirect to invoices
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching upload status:', error);
+                        });
+                }, 3000); // Poll every 3 seconds
             }
-
-            // Get the file ID from the response to start polling for its status
-            const fileId = data.file_id; 
-
-            // Start polling the server for processing status
-            const intervalId = setInterval(() => {
-                fetch(`/status/${fileId}/`)
-                    .then(response => response.json())
-                    .then(statusData => {
-                        if (statusData.status === 'processed') {
-                            clearInterval(intervalId);
-                            window.location.href = `/invoices/${fileId}`; // Redirect to invoices
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching upload status:', error);
-                    });
-            }, 3000); // Poll every 3 seconds
         })
         .catch(error => {
             console.error('Error uploading CSV:', error);
             alert('Failed to upload CSV. Please try again.');
-            document.getElementById('spinner').style.display = 'none'; // Hide spinner on error
         });
     };
 </script>

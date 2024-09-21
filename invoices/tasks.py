@@ -27,6 +27,10 @@ def process_csv_file(file_id):
         # Decode the CSV file
         decoded_file = csv_file.read().decode('utf-8').splitlines()
         reader = csv.DictReader(decoded_file)
+        
+        # List to hold the timesheet entries
+        timesheet_entries = []
+        batch_size = 100
 
         # Process each row in the CSV file
         for row in reader:
@@ -66,9 +70,8 @@ def process_csv_file(file_id):
                 if billable_rate.rate != Decimal(row['Billable Rate (per hour)']):
                     raise ValueError(f"Billable rate for employee {employee_obj.employee_id} in same file can't have two different values.")
 
-            
-            # Create Timesheet entry
-            TimesheetInvoice.objects.create(
+            # Add the TimesheetInvoice object to the list
+            timesheet_entries.append(TimesheetInvoice(
                 file=timesheet_file,
                 employee=employee_obj,
                 project=project_obj,
@@ -76,7 +79,17 @@ def process_csv_file(file_id):
                 date=date,
                 start_time=start_time,
                 end_time=end_time
-            )
+            ))
+            
+            # Bulk create when batch size is reached
+            if len(timesheet_entries) >= batch_size:
+                TimesheetInvoice.objects.bulk_create(timesheet_entries)
+                timesheet_entries = []  # Reset the list
+
+        # Process any remaining entries
+        if timesheet_entries:
+            TimesheetInvoice.objects.bulk_create(timesheet_entries)
+            
     
         # Trigger the summary computation task
         compute_invoice_summary.delay(file_id)

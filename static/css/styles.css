@@ -12,8 +12,13 @@ body {
     flex-direction: column;
     font-family: 'Verdana', 'Roboto', sans-serif;
     text-rendering: optimizeLegibility;
-    background-color: #dddddd; /* Replace background image with a simple color */
+    background-color: #f5f5f5; /* Replace background image with a simple color */
     margin: 0;
+}
+
+.modal-content {
+    background-color: #f5f5f5;
+    border-radius: 20px;
 }
 
 
@@ -83,20 +88,6 @@ h1, h5 {
     margin-right: 8px;
     color: #007bff;
 }
-
-/* Upload button style */
-.btn-outline-primary {
-    border-color: #007bff;
-    color: #007bff;
-    background-color: transparent;
-    transition: all 0.3s ease;
-}
-
-.btn-outline-primary:hover {
-    background-color: #007bff;
-    color: #fff;
-}
-
 
 
 
