@@ -1,37 +1,66 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block content %}
-<h1>Invoices</h1>
+<div class="container mt-5" id="invoice-content">
 
-{% for file, projects in grouped_invoices.items %}
-    <h2>File: {{ file.file.name }}</h2>
-    {% for project, invoices in projects.items %}
-        <h3>Project: {{ project }}</h3>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Employee ID</th>
-                    <th>Number of Hours</th>
-                    <th>Unit Price</th>
-                    <th>Cost</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for invoice in invoices %}
-                <tr>
-                    <td>{{ invoice.employee.employee_id }}</td>
-                    <td>{{ invoice.number_of_hours }}</td>
-                    <td>{{ invoice.unit_price }}</td>
-                    <td>{{ invoice.cost }}</td>
-                </tr>
-                {% endfor %}
-                <!-- Calculate the total for the project -->
-                <tr>
-                    <td colspan="3"><strong>Total</strong></td>
-                    <td><strong>{{ invoices|sum:'cost' }}</strong></td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- Projects and Employees Summary -->
+    {% for project_name, employees in project_summary %}
+        <div class="card mb-4">
+            <div class="card-header bg-dark">
+                <h2>Project: {{ project_name }}</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-hover text-center">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Total Hours Worked</th>
+                            <th>Unit Price</th>
+                            <th>Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for employee in employees %}
+                        <tr>
+                            <td>{{ employee.employee_id }}</td>
+                            <td>{{ employee.total_hours }}</td>
+                            <td>{{ employee.unit_price }}</td>
+                            <td>{{ employee.cost }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-right"><strong>Total Cost for Project</strong></td>
+                            <td>{{ project_total_costs|get_item:project_name }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
     {% endfor %}
-{% endfor %}
+</div>
+
+<!-- Button to trigger the PDF download -->
+<button id="download-pdf" class="btn btn-primary mt-4">Download as PDF</button>
+{% endblock %}
+
+{% block extra_scripts %}
+    <!-- This script will convert the invoice content to a PDF file -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <script>
+        document.getElementById('download-pdf').addEventListener('click', function () {
+            var element = document.getElementById('invoice-content');
+            html2pdf()
+                .from(element)
+                .set({
+                    margin: 1,
+                    filename: 'Invoice_{{ file_id }}.pdf',
+                    html2canvas: { scale: 2 },
+                    jsPDF: { orientation: 'portrait' }
+                })
+                .save();
+        });
+    </script>
 {% endblock %}

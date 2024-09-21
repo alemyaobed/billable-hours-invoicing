@@ -1,6 +1,8 @@
 from django.db import models
 from datetime import date, datetime, timedelta
 from uuid import uuid4
+from django.utils.timezone import now
+
 
 class TimeSheetFile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
@@ -11,20 +13,32 @@ class TimeSheetFile(models.Model):
     def __str__(self):
         return self.file.name
 
+
 class Employee(models.Model):
     employee_id = models.IntegerField(unique=True)
+
+
+class BillableRate(models.Model):
+    file = models.ForeignKey(TimeSheetFile, on_delete=models.CASCADE)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    rate = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    class Meta:
+        unique_together = ('file', 'employee')
 
 class Project(models.Model):
     name = models.CharField(max_length=255)
 
-class Timesheet(models.Model):
+
+class TimesheetInvoice(models.Model):
     file = models.ForeignKey(TimeSheetFile, on_delete=models.CASCADE)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    billable_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    billable_rate = models.ForeignKey(BillableRate, on_delete=models.CASCADE)
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
+    invoice_date = models.DateField(default=now)
 
     @property
     def hours_worked(self):
@@ -34,15 +48,16 @@ class Timesheet(models.Model):
         duration = end - start
         return round(duration.total_seconds() / 3600, 2)
 
-class Invoice(models.Model):
-    file = models.ForeignKey(TimeSheetFile, on_delete=models.CASCADE)
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    number_of_hours = models.DecimalField(max_digits=10, decimal_places=2)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    cost = models.DecimalField(max_digits=10, decimal_places=2)
-    invoice_date = models.DateField(default=date.today)
+
+    def __str__(self):
+        return f"TimesheetInvoice {self.id} - {self.employee} - {self.date}"
     
 
-    @property
-    def total_amount(self):
-        return self.timesheet.hours_worked * self.timesheet.billable_rate
+class InvoiceSummary(models.Model):
+    file = models.ForeignKey(TimeSheetFile, on_delete=models.CASCADE)
+    project_summary = models.JSONField()
+    project_total_costs = models.JSONField()
+    
+    def __str__(self):
+        return f"InvoiceSummary {self.id} - {self.file}"
+   

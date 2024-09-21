@@ -2,8 +2,8 @@ amqp==5.2.0
 asgiref==3.8.1
 backports.zoneinfo==0.2.1
 billiard==4.2.0
+Brotli==1.1.0
 celery==5.4.0
-cffi==1.17.1
 click==8.1.7
 click-didyoumean==0.3.1
 click-plugins==1.1.1
@@ -25,4 +25,6 @@ typing-extensions==4.12.2
 tzdata==2024.1
 vine==5.1.0
 wcwidth==0.2.13
+webencodings==0.5.1
 whitenoise==6.7.0
+zopfli==0.2.3

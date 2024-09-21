@@ -1,8 +1,8 @@
-
+{% load static %}
 <nav class="navbar sticky-top">
-    <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="path-to-your-image.png" width="50" height="50" class="d-inline-block align-top mr-2" alt="Logo">
-        <span class="navbar-text display-4 font-weight-bold">BHIS</span>
+    <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
+        <img src="{% static 'images/background-img.png' %}" width="50" height="50" class="d-inline-block align-top mr-3 ml-4" alt="Logo">
+        <span class="navbar-text display-4 font-weight-bold cursive-text">BHIS</span>
     </a>
 </nav>
 

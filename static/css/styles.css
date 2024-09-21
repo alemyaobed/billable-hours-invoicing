@@ -1,33 +1,31 @@
 
+
+.cursive-text {
+    font-family: cursive;
+}
+
+
+/* Add a smooth scroll effect to the navbar links */
+
 body {
     display: flex;
     flex-direction: column;
-    font-family: cursive;
+    font-family: 'Verdana', 'Roboto', sans-serif;
     text-rendering: optimizeLegibility;
-    background-image: url('../images/background-img.png');
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
-    backdrop-filter: blur(25px);
+    background-color: #dddddd; /* Replace background image with a simple color */
+    margin: 0;
 }
 
-main {
-    flex-grow: 1;
-}
 
 .navbar {
-    background: rgba(255, 255, 255, 0.1); /* Make the navbar background more transparent */
-    backdrop-filter: blur(20px); /* Increase blur intensity */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    background: rgba(255, 255, 255, 0.1); /* Transparent navbar */
+    backdrop-filter: blur(20px);
     padding: 10px 20px;
-    position: sticky; /* Ensures the navbar sticks to the top as you scroll */
+    position: sticky;
     top: 0;
-    z-index: 1000; /* Stays on top of other content */
 }
 
-
 .navbar-text {
-    color: white;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Adds a shadow to make the text clearer */
     font-size: 2.5rem;
 }
@@ -36,10 +34,8 @@ main {
     border-radius: 50%; /* Makes the logo round */
 }
 
-
-
-nav, footer {
-    color: white;
+.navbar-nav {
+    margin-left: auto;
 }
 
 h1, h5 {
@@ -47,24 +43,27 @@ h1, h5 {
 }
 
 
-pre {
-    font-family: 'Courier New', monospace;
-    font-size: 1rem;
+
+
+
+h1, h5 {
+    font-weight: 700;
 }
 
 .card {
-    border-radius: 10px;
+    border-radius: 20px;
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    background-color: rgba(255, 255, 255, 0.9); /* Slight transparency */
+    background: rgba(255, 255, 255, 0.9);
+    /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); */
 }
 
-.card:hover {
+/* .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
+    
+} */
 
 .h-100 {
-    height: 100%; /* Ensures equal height for cards */
+    height: 100%;
 }
 
 .bg-light {
@@ -73,14 +72,31 @@ pre {
 
 
 
-.btn-outline-gold {
-    color: #ffd700;
-    border: 2px solid #ffd700;
-    background-color: transparent;
-    transition: background-color 0.3s ease, color 0.3s ease;
+
+.form-group label {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
 }
 
-.btn-outline-gold:hover {
-    background-color: #ffd700;
-    color: #fff; /* White text on hover */
+.form-group label i {
+    margin-right: 8px;
+    color: #007bff;
 }
+
+/* Upload button style */
+.btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+
+
+

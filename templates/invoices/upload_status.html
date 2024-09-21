@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 white-text">
+    <h2>Upload Status</h2>
+    <p>File ID: {{ file_id }}</p>
+    <p>Status: {{ status }}</p>
+
+    {% if status == 'Processing' %}
+        <p>Your file is still being processed. Please check back later.</p>
+        <!-- Button to reload the status -->
+        <form action="{% url 'upload_status' file_id=file_id %}" method="get">
+            <button type="submit" class="btn btn-primary">Check Status Again</button>
+        </form>
+    {% elif status == 'Failed' %}
+        <p>There was an error processing your file. Please try uploading the file again.</p>
+    {% else %}
+        <!-- You can show a link to view the invoice or any other status details here -->
+        <a href="{% url 'invoice_summary' file_id=file_id %}" class="btn btn-success">View Invoice</a>
+    {% endif %}
+</div>
+{% endblock %}
