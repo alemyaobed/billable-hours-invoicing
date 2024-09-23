@@ -8,6 +8,7 @@ class Status(models.TextChoices):
     PENDING = 'PENDING', 'Pending'
     PROCESSED = 'PROCESSED', 'Processed'
     FAILED = 'FAILED', 'Failed'
+    LOADED = 'LOADED', 'Loaded'
 
 
 class TimeSheetFile(models.Model):

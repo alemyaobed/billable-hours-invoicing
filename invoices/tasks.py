@@ -94,8 +94,9 @@ def process_csv_file(file_id):
             # Process any remaining entries
             if timesheet_entries:
                 TimesheetInvoice.objects.bulk_create(timesheet_entries)
-            
-    
+        
+        timesheet_file.status = Status.LOADED    
+
         # Trigger the summary computation task
         compute_invoice_summary.delay(file_id)
 
@@ -119,13 +120,15 @@ def compute_invoice_summary(file_id):
     """
     
     try:
-        # Fetch all invoices related to the given file ID
-        invoices = TimesheetInvoice.objects.filter(file_id=file_id).select_related('project', 'employee', 'billable_rate')
         
         timesheet_file = TimeSheetFile.objects.get(id=file_id)
-                
-
-
+        
+        if timesheet_file.status != Status.LOADED:
+            raise ValueError(f"File {file_id} has not been loaded yet.")    
+        
+        # Fetch all invoices related to the given file ID
+        invoices = TimesheetInvoice.objects.filter(file_id=file_id).select_related('project', 'employee', 'billable_rate')
+    
         # Dictionary to hold the grouped invoice data by project
         project_summary = defaultdict(list)
 
