@@ -220,12 +220,23 @@ Employee ID, Billable Rate (per hour), Project, Date, Start Time, End Time
                         </div>
                     </div>
                     <div class="modal-footer d-flex justify-content-center">
+
+                        <!-- Upload Button & Spinner -->
                         <button id="uploadButton" type="submit" class="btn btn-outline-secondary">
                             <i id="uploadIcon" class="fas fa-cloud-upload-alt"></i> <span id="buttonText">Upload</span>
                             <div id="buttonSpinner" class="spinner-border spinner-border-sm text-dark" role="status" style="display:none;">
                                 <span class="sr-only">Loading...</span>
                             </div>
                         </button>
+
+                        <!-- Try Again Button & Spinner -->
+                        <button id="tryAgainButton" class="btn btn-outline-secondary" style="display: none;">
+                            <i id="tryAgainIcon" class="fas fa-redo"></i> <span id="tryAgainText">Try Again</span>
+                            <div id="tryAgainSpinner" class="spinner-border spinner-border-sm text-dark" role="status" style="display:none;">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </button>
+
                     </div>
                 </form>
             </div>

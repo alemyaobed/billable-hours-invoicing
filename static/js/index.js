@@ -35,6 +35,95 @@ function showFlashMessage(message, type) {
 }
 
 // Existing form submission script with spinner and status polling
+// document.getElementById("uploadForm").onsubmit = function (event) {
+//   event.preventDefault();
+
+//   let uploadButton = document.getElementById("uploadButton");
+//   let buttonSpinner = document.getElementById("buttonSpinner");
+//   let buttonText = document.getElementById("buttonText");
+//   let uploadIcon = document.getElementById("uploadIcon");
+
+//   let formData = new FormData(this);
+
+//   // Function to reset the upload button and UI
+//   function resetUploadButton() {
+//     buttonText.textContent = "Upload"; // Reset button text
+//     uploadIcon.style.display = "inline"; // Show the upload icon
+//     uploadButton.disabled = false; // Re-enable button
+//     buttonSpinner.style.display = "none"; // Hide spinner
+//   }
+
+//   fetch(upload_url, {
+//     method: "POST",
+//     body: formData,
+//   })
+//     .then((response) => response.json())
+//     .then((data) => {
+//       if (data.error) {
+//         showFlashMessage(data.error, "danger");
+//       } else {
+//         // Update button text and state if successful
+//         buttonText.textContent = "Processing..."; // Change text to "Processing..."
+//         uploadIcon.style.display = "none"; // Hide the upload icon
+//         uploadButton.disabled = true; // Disable button
+//         buttonSpinner.style.display = "inline-block"; // Show spinner
+
+//         showFlashMessage(data.message, "success");
+
+//         const fileId = data.file_id;
+
+//         const intervalId = setInterval(() => {
+//           fetch(`/status/${fileId}/`)
+//             .then((response) => response.json())
+//             .then((statusData) => {
+//               if (statusData.status === "PROCESSED") {
+//                 clearInterval(intervalId);
+//                 window.location.href = `/invoices/${fileId}`;
+//               } else if (statusData.status === "FAILED") {
+//                 clearInterval(intervalId);
+
+//                 // Show error message
+//                 showFlashMessage(
+//                   statusData.message || "An unknown error occurred.",
+//                   "danger"
+//                 );
+
+//                 // Reset the upload button and UI
+//                 resetUploadButton();
+//               } else if (statusData.status === "error") {
+//                 clearInterval(intervalId); // Clear interval on error
+//                 showFlashMessage(
+//                   statusData.message || "An unknown error occurred.",
+//                   "danger"
+//                 );
+
+//                 // Reset the upload button and UI
+//                 resetUploadButton();
+//               }
+//             })
+//             .catch((error) => {
+//               console.error("Error fetching upload status:", error);
+//               clearInterval(intervalId); // Clear interval on fetch error
+//               showFlashMessage(
+//                 "Error fetching upload status. Please try again.",
+//                 "danger"
+//               );
+
+//               // Reset the upload button and UI
+//               resetUploadButton();
+//             });
+//         }, 3000);
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error uploading CSV:", error);
+//       showFlashMessage("Failed to upload CSV. Please try again.", "danger");
+
+//       // Reset the upload button and UI
+//       resetUploadButton();
+//     });
+// };
+
 document.getElementById("uploadForm").onsubmit = function (event) {
   event.preventDefault();
 
@@ -42,15 +131,29 @@ document.getElementById("uploadForm").onsubmit = function (event) {
   let buttonSpinner = document.getElementById("buttonSpinner");
   let buttonText = document.getElementById("buttonText");
   let uploadIcon = document.getElementById("uploadIcon");
+  let tryAgainButton = document.getElementById("tryAgainButton");
+  let tryAgainText = document.getElementById("tryAgainText");
+  let tryAgainSpinner = document.getElementById("tryAgainSpinner");
+  let tryAgainIcon = document.getElementById("tryAgainIcon");
 
   let formData = new FormData(this);
 
   // Function to reset the upload button and UI
   function resetUploadButton() {
-    buttonText.textContent = "Upload"; // Reset button text
-    uploadIcon.style.display = "inline"; // Show the upload icon
-    uploadButton.disabled = false; // Re-enable button
-    buttonSpinner.style.display = "none"; // Hide spinner
+    buttonText.textContent = "Upload";
+    uploadIcon.style.display = "inline";
+    uploadButton.disabled = false;
+    buttonSpinner.style.display = "none";
+    tryAgainButton.style.display = "none"; // Hide the try again button
+  }
+
+  // Reset the "Try Again" button
+  function resetTryAgainButton() {
+    tryAgainText.textContent = "Try Again";
+    tryAgainButton.disabled = false;
+    tryAgainSpinner.style.display = "none";
+    tryAgainIcon.style.display = "inline";
+    tryAgainButton.style.display = "none"; // Hide the "Try Again" button
   }
 
   fetch(upload_url, {
@@ -61,65 +164,139 @@ document.getElementById("uploadForm").onsubmit = function (event) {
     .then((data) => {
       if (data.error) {
         showFlashMessage(data.error, "danger");
-      } else {
-        // Update button text and state if successful
-        buttonText.textContent = "Processing..."; // Change text to "Processing..."
-        uploadIcon.style.display = "none"; // Hide the upload icon
-        uploadButton.disabled = true; // Disable button
-        buttonSpinner.style.display = "inline-block"; // Show spinner
+        resetUploadButton();
+        return;
+      }
 
-        showFlashMessage(data.message, "success");
+      buttonText.textContent = "Processing...";
+      uploadIcon.style.display = "none";
+      uploadButton.disabled = true;
+      buttonSpinner.style.display = "inline-block";
+      showFlashMessage(data.message, "success");
 
-        const fileId = data.file_id;
+      const fileId = data.file_id;
 
-        const intervalId = setInterval(() => {
+      let pollingInterval = 3000; // Start with 3 seconds
+      let attempts = 0;
+      let intervalId; // Declare the intervalId
+      let maxAttempts = 8; // Total attempts to reach 12 seconds
+
+      const startPolling = () => {
+        intervalId = setInterval(() => {
           fetch(`/status/${fileId}/`)
             .then((response) => response.json())
             .then((statusData) => {
               if (statusData.status === "PROCESSED") {
                 clearInterval(intervalId);
                 window.location.href = `/invoices/${fileId}`;
-              } else if (statusData.status === "FAILED") {
+              } else if (
+                statusData.status === "FAILED" ||
+                statusData.status === "error"
+              ) {
                 clearInterval(intervalId);
-
-                // Show error message
                 showFlashMessage(
                   statusData.message || "An unknown error occurred.",
                   "danger"
                 );
-
-                // Reset the upload button and UI
-                resetUploadButton();
-              } else if (statusData.status === "error") {
-                clearInterval(intervalId); // Clear interval on error
-                showFlashMessage(
-                  statusData.message || "An unknown error occurred.",
-                  "danger"
-                );
-
-                // Reset the upload button and UI
                 resetUploadButton();
               }
+
+              attempts++;
+              if (attempts === maxAttempts) {
+                clearInterval(intervalId); // Stop polling
+                tryAgainButton.style.display = "inline-block"; // Show the "Try Again" button
+                uploadButton.style.display = "none"; // Hide the upload button
+
+                // Show the message after first multiple attempts
+                showFlashMessage(
+                  "Please wait a bit before trying again.",
+                  "warning"
+                );
+              }
+
+              // Update polling interval for next request
+              pollingInterval += 1500; // Increase by 1.5 seconds
             })
             .catch((error) => {
               console.error("Error fetching upload status:", error);
-              clearInterval(intervalId); // Clear interval on fetch error
+              clearInterval(intervalId);
               showFlashMessage(
                 "Error fetching upload status. Please try again.",
                 "danger"
               );
-
-              // Reset the upload button and UI
               resetUploadButton();
             });
-        }, 3000);
-      }
+        }, pollingInterval);
+      };
+
+      // Start the polling process
+      startPolling();
+
+      // Handle "Try Again" button click
+      tryAgainButton.onclick = function () {
+        // Stop the existing polling
+        clearInterval(intervalId);
+
+        // Reset button UI
+        tryAgainText.textContent = "Trying again...";
+        tryAgainButton.disabled = true;
+        tryAgainSpinner.style.display = "inline-block"; // Show spinner
+        tryAgainIcon.style.display = "none"; // Hide the icon
+
+        // Restart the polling process
+        let newAttempts = 0; // Reset attempts for "Try Again"
+        let newPollingInterval = 3000; // Reset to 3 seconds
+
+        const retryIntervalId = setInterval(() => {
+          fetch(`/status/${fileId}/`)
+            .then((response) => response.json())
+            .then((statusData) => {
+              if (statusData.status === "PROCESSED") {
+                clearInterval(retryIntervalId);
+                window.location.href = `/invoices/${fileId}`;
+              } else if (
+                statusData.status === "FAILED" ||
+                statusData.status === "error"
+              ) {
+                clearInterval(retryIntervalId);
+                showFlashMessage(
+                  statusData.message || "An unknown error occurred.",
+                  "danger"
+                );
+                resetUploadButton();
+              }
+
+              newAttempts++;
+              if (newAttempts >= maxAttempts) {
+                // After 8 attempts (12 seconds), stop retrying and show the message
+                clearInterval(retryIntervalId);
+                showFlashMessage(
+                  "No response after multiple attempts. Please try uploading again.",
+                  "warning"
+                );
+                resetUploadButton();
+                uploadButton.style.display = "inline-block"; // Show the upload button
+                resetTryAgainButton(); // Reset the "Try Again" button
+              }
+
+              // Update polling interval for next request
+              newPollingInterval += 1500; // Increase by 1.5 seconds
+            })
+            .catch((error) => {
+              console.error("Error fetching upload status:", error);
+              clearInterval(retryIntervalId);
+              showFlashMessage(
+                "Error fetching upload status. Please try again.",
+                "danger"
+              );
+              resetUploadButton();
+            });
+        }, newPollingInterval);
+      };
     })
     .catch((error) => {
       console.error("Error uploading CSV:", error);
       showFlashMessage("Failed to upload CSV. Please try again.", "danger");
-
-      // Reset the upload button and UI
       resetUploadButton();
     });
 };
