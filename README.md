@@ -23,7 +23,7 @@ pip install -r requirements.txt
 ```
 
 ### 3. Setup Environment Variables
-Create a `.env` file and configure your database and secret keys.
+Create a `.env` file and configure your database, secret keys, celery broker url and your celery result backend.
 
 ### 4. Run the Application
 ```bash
@@ -31,7 +31,14 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-### 5. Run Tests
+### 5. Start Celery
+Ensure you have a Celery broker installed (e.g., Redis or RabbitMQ). Start the broker, then run the following command in a new terminal:
+```bash
+celery -A your_project_name worker --loglevel=info
+```
+*Replace `your_project_name` with the actual name of your Django project.*
+
+### 6. Run Tests
 ```bash
 python manage.py test
 ```

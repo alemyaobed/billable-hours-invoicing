@@ -1,13 +1,24 @@
 from django.db import models
-from datetime import date, datetime, timedelta
+from datetime import datetime
 from uuid import uuid4
 from django.utils.timezone import now
+
+
+class Status(models.TextChoices):
+    PENDING = 'PENDING', 'Pending'
+    PROCESSED = 'PROCESSED', 'Processed'
+    FAILED = 'FAILED', 'Failed'
 
 
 class TimeSheetFile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     file = models.FileField(upload_to='timesheets/')
-    is_fully_processed = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+    error_message = models.TextField(blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -25,6 +36,7 @@ class BillableRate(models.Model):
     
     class Meta:
         unique_together = ('file', 'employee')
+
 
 class Project(models.Model):
     name = models.CharField(max_length=255)
@@ -60,4 +72,3 @@ class InvoiceSummary(models.Model):
     
     def __str__(self):
         return f"InvoiceSummary {self.id} - {self.file}"
-   

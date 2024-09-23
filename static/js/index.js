@@ -13,6 +13,7 @@ document.getElementById("csvFile").addEventListener("change", function () {
   }
 });
 
+// Show flash message function
 function showFlashMessage(message, type) {
   const alertContainer = document.createElement("div");
   alertContainer.className = `alert alert-${type} flash-message`;
@@ -21,11 +22,16 @@ function showFlashMessage(message, type) {
   // Append to the body
   document.body.appendChild(alertContainer);
 
-  // Automatically disappear after a few seconds
+  // Calculate duration based on message length
+  const baseDuration = 3000; // Minimum duration of 3 seconds
+  const extraDuration = Math.max(0, message.length * 100); // 100ms for each character
+  const duration = Math.max(baseDuration, extraDuration + baseDuration); // Ensure minimum duration
+
+  // Automatically disappear after the calculated duration
   setTimeout(() => {
     alertContainer.classList.add("fade-out"); // Start fade out
     setTimeout(() => alertContainer.remove(), 500); // Remove after fade
-  }, 3000); // Adjust duration as needed
+  }, duration);
 }
 
 // Existing form submission script with spinner and status polling
@@ -37,13 +43,15 @@ document.getElementById("uploadForm").onsubmit = function (event) {
   let buttonText = document.getElementById("buttonText");
   let uploadIcon = document.getElementById("uploadIcon");
 
-  // Update button text and state
-  buttonText.textContent = "Processing..."; // Change text to "Processing..."
-  uploadIcon.style.display = "none"; // Hide the upload icon
-  uploadButton.disabled = true; // Disable button
-  buttonSpinner.style.display = "inline-block"; // Show spinner
-
   let formData = new FormData(this);
+
+  // Function to reset the upload button and UI
+  function resetUploadButton() {
+    buttonText.textContent = "Upload"; // Reset button text
+    uploadIcon.style.display = "inline"; // Show the upload icon
+    uploadButton.disabled = false; // Re-enable button
+    buttonSpinner.style.display = "none"; // Hide spinner
+  }
 
   fetch(upload_url, {
     method: "POST",
@@ -54,23 +62,55 @@ document.getElementById("uploadForm").onsubmit = function (event) {
       if (data.error) {
         showFlashMessage(data.error, "danger");
       } else {
-        showFlashMessage(
-          "File uploaded successfully. Processing commenced.",
-          "success"
-        );
+        // Update button text and state if successful
+        buttonText.textContent = "Processing..."; // Change text to "Processing..."
+        uploadIcon.style.display = "none"; // Hide the upload icon
+        uploadButton.disabled = true; // Disable button
+        buttonSpinner.style.display = "inline-block"; // Show spinner
+
+        showFlashMessage(data.message, "success");
+
         const fileId = data.file_id;
 
         const intervalId = setInterval(() => {
           fetch(`/status/${fileId}/`)
             .then((response) => response.json())
             .then((statusData) => {
-              if (statusData.status === "processed") {
+              if (statusData.status === "PROCESSED") {
                 clearInterval(intervalId);
                 window.location.href = `/invoices/${fileId}`;
+              } else if (statusData.status === "FAILED") {
+                clearInterval(intervalId);
+
+                // Show error message
+                showFlashMessage(
+                  statusData.message || "An unknown error occurred.",
+                  "danger"
+                );
+
+                // Reset the upload button and UI
+                resetUploadButton();
+              } else if (statusData.status === "error") {
+                clearInterval(intervalId); // Clear interval on error
+                showFlashMessage(
+                  statusData.message || "An unknown error occurred.",
+                  "danger"
+                );
+
+                // Reset the upload button and UI
+                resetUploadButton();
               }
             })
             .catch((error) => {
               console.error("Error fetching upload status:", error);
+              clearInterval(intervalId); // Clear interval on fetch error
+              showFlashMessage(
+                "Error fetching upload status. Please try again.",
+                "danger"
+              );
+
+              // Reset the upload button and UI
+              resetUploadButton();
             });
         }, 3000);
       }
@@ -78,5 +118,8 @@ document.getElementById("uploadForm").onsubmit = function (event) {
     .catch((error) => {
       console.error("Error uploading CSV:", error);
       showFlashMessage("Failed to upload CSV. Please try again.", "danger");
+
+      // Reset the upload button and UI
+      resetUploadButton();
     });
 };
