@@ -21,8 +21,8 @@ def upload_csv(request):
         if not csv_file:
             return JsonResponse({'error': 'No file was uploaded.'}, status=400)
         
-        if not csv_file.name.endswith('.csv'):
-            return JsonResponse({'error': 'File is not in CSV format.'}, status=400)
+        if not (csv_file.name.endswith('.csv') or csv_file.content_type == 'text/csv'):
+            return JsonResponse({'error': 'File is not in CSV format. Please upload a CSV file.'}, status=400)
         
         if csv_file.size == 0:
             return JsonResponse({'error': 'File is empty.'}, status=400)
@@ -44,11 +44,13 @@ def upload_csv(request):
             csv_reader = csv.reader(decoded_file)
 
             # Skip the header row (assuming the first row is the header)
+            # Per guidelines, the header row should be the first row
             header = next(csv_reader, None)
             
             if not header:
                 return JsonResponse(
-                    {'error': 'CSV file is empty or does not conform to the guidelines! Please read the guidelines.'}, status=400)
+                    {
+                        'error': 'CSV file does not contain a header or does not conform to the guidelines! Please read the guidelines.'}, status=400)
 
             # Check if the header row matches the expected headers
             if header != expected_headers:
@@ -57,7 +59,7 @@ def upload_csv(request):
 
             # Check if there are any rows after the header
             if not any(csv_reader):
-                return JsonResponse({'error': 'CSV file is empty or contains only the header.'}, status=400)
+                return JsonResponse({'error': 'CSV file contains only the header.'}, status=400)
         
         except Exception as e:
             return JsonResponse({'error': f'Error reading the file: {str(e)}'}, status=500)

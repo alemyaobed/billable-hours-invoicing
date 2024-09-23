@@ -4,10 +4,8 @@
 This web application allows law firms to generate client invoices based on the number of hours worked by employees. Lawyers submit their timesheets in CSV format, and the system calculates the total hours and generates an invoice for each client.
 
 ## Features
-- Upload CSV timesheets
-- Calculate billable hours per employee
-- Generate invoices for each project
-- Django admin for managing employees and projects
+- Upload CSV timesheets file
+- Generate invoices for each project listed in the file
 
 ## Setup Instructions
 
@@ -39,9 +37,18 @@ celery -A your_project_name worker --loglevel=info
 *Replace `your_project_name` with the actual name of your Django project.*
 
 ### 6. Run Tests
+Make sure the celery process is already started
 ```bash
-python manage.py test invoices.tests
+python manage.py test
 ```
+
+
+### 7. Deployment
+Before deploying the application, ensure to run the following command to collect static files:
+```bash
+python manage.py collectstatic
+```
+This command gathers all static assets into the specified directory for serving in production.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
