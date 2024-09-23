@@ -40,7 +40,7 @@ celery -A your_project_name worker --loglevel=info
 
 ### 6. Run Tests
 ```bash
-python manage.py test
+python manage.py test invoices.tests
 ```
 
 ## License
