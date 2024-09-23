@@ -1,9 +1,9 @@
 from django.urls import path
-from . import views
+from .views import IndexView, UploadCSVView, InvoicesView, StatusView
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('upload/', views.upload_csv, name='upload_csv'),
-    path('invoices/<uuid:file_id>/', views.view_invoices, name='view_invoices'),
-    path('status/<uuid:file_id>/', views.upload_status, name='upload_status'),
+    path('', IndexView.as_view(), name='index'),
+    path('upload/', UploadCSVView.as_view(), name='upload_csv'),
+    path('invoices/<uuid:file_id>/', InvoicesView.as_view(), name='view_invoices'),
+    path('status/<uuid:file_id>/', StatusView.as_view(), name='upload_status'),
 ]
