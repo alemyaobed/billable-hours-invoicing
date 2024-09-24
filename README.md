@@ -32,9 +32,12 @@ python manage.py runserver
 ### 5. Start Celery
 Ensure you have a Celery broker installed (e.g., Redis or RabbitMQ). Start the broker, then run the following command in a new terminal:
 ```bash
+celery -A <your_project_name> worker --loglevel=info
+```
+*Replace `your_project_name` with the actual name of your Django project. In this case billable_hours:*
+```bash
 celery -A your_project_name worker --loglevel=info
 ```
-*Replace `your_project_name` with the actual name of your Django project.*
 
 ### 6. Run Tests
 Make sure the celery process is already started
