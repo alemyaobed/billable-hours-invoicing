@@ -95,7 +95,8 @@ def process_csv_file(file_id):
             if timesheet_entries:
                 TimesheetInvoice.objects.bulk_create(timesheet_entries)
         
-        timesheet_file.status = Status.LOADED    
+        timesheet_file.status = Status.LOADED
+        timesheet_file.save()
 
         # Trigger the summary computation task
         compute_invoice_summary.delay(file_id)
