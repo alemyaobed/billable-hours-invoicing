@@ -36,7 +36,7 @@ celery -A <your_project_name> worker --loglevel=info
 ```
 *Replace `your_project_name` with the actual name of your Django project. In this case billable_hours:*
 ```bash
-celery -A your_project_name worker --loglevel=info
+celery -A billable_hours worker --loglevel=info
 ```
 
 ### 6. Run Tests
